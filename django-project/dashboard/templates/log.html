@@ -1,0 +1,41 @@
+{% extends 'layouts/app.html' %}
+
+{% load has_group %}
+
+{% block title %} 
+    Employee log
+{% endblock %}
+
+{% block content %}
+    {% if request.user|has_group:"employer" %} 
+        {% if logs %}
+        <table class="table table-bordered">
+            <tr>
+                <th>Username</th>
+                <th>Date</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Breaks</th>
+                <th>Notes</th>
+            </tr>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.user.username }}</td>
+                <td>{{ log.date }}</td>
+                <td>{{ log.dstime }}</td>
+                <td>{{ log.detime }}</td>
+                <td>{{ log.pstime }} - {{ log.petime }}</td>
+                <td>{% if log.notes %} {{ log.notes }} {% else %} N/D {%endif%}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+            <p>Log is empty</p>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-danger" role="alert">
+            Error: Employer only page
+        </div>
+    {% endif %}
+{% endblock %}
+

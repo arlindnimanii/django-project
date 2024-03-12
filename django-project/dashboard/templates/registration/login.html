@@ -1,0 +1,14 @@
+{% extends 'layouts/auth.html' %}
+
+{% block title %} 
+    Login
+{% endblock %}
+
+{% block content %}
+    <form action="{% url 'login' %}" method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit" class="btn btn-sm btn-outline-primary">Login</button>
+        <a href="{% url 'register' %}" class="btn btn-sm btn-outline-link">Register</a>
+    </form>
+{% endblock %}

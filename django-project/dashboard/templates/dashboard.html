@@ -1,0 +1,138 @@
+{% extends 'layouts/app.html' %}
+
+{% load has_group %}
+
+{% block title %} 
+    Dashboard
+{% endblock %}
+
+{% block content %}
+    
+    {% if request.user|has_group:"employee" %} 
+        <div class="d-flex justify-content-between mb-4">
+            <span>Actions</span>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#checkinModal">
+                    <i class="bi bi-door-open"></i>
+                </button>
+                <a href="{% url 'checkout' %}" type="button" class="btn btn-primary">
+                    <i class="bi bi-door-closed"></i>
+                </a>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#lunchbreakModal">
+                    <i class="bi bi-cup-hot"></i>
+                </button>
+            </div>
+        </div>
+
+        {% if logs %}
+        <table class="table table-bordered">
+            <tr>
+                <th>Username</th>
+                <th>Date</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Breaks</th>
+                <th>Notes</th>
+            </tr>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.user.username }}</td>
+                <td>{{ log.date }}</td>
+                <td>{{ log.dstime }}</td>
+                <td>{{ log.detime }}</td>
+                <td>{{ log.pstime }} - {{ log.petime }}</td>
+                <td>{% if log.notes %} {{ log.notes }} {% else %} N/D {%endif%}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+        <!-- Checkin Modal -->
+        <div class="modal fade" id="checkinModal" tabindex="-1" aria-labelledby="checkinModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="checkinModalLabel">Checkin</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{% url 'checkin' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="form-group mb-2">
+                                <label for="date">Date</label>
+                                <input type="text" name="date" class="form-control" required id="date" placeholder="2023-05-31" />
+                            </div>
+                            <div class="form-group mb-2">
+                                <label for="dstime">Start</label>
+                                <input type="text" name="dstime" class="form-control" required id="dstime" placeholder="19:20:45" />
+                            </div>
+                            <div class="form-group">
+                                <label for="notes">Notes</label>
+                                <textarea name="notes" class="form-control" id="notes" placeholder="Text..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lunch break Modal -->
+        <div class="modal fade" id="lunchbreakModal" tabindex="-1" aria-labelledby="lunchbreakModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="lunchbreakModalLabel">Lunch break</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{% url 'lunchbreak' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="form-group mb-2">
+                                <label for="pstime">Start</label>
+                                <input type="text" name="pstime" class="form-control" id="pstime" placeholder="12:20:00" />
+                            </div>
+                            <div class="form-group mb-2">
+                                <label for="petime">End</label>
+                                <input type="text" name="petime" class="form-control" id="petime" placeholder="13:20:00" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if request.user|has_group:"employer" %} 
+        {% if employees %}
+        <table class="table table-bordered">
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th></th>
+            </tr>
+            {% for employee in employees %}
+                {% if not employee|has_group:"employer" and not employee.is_staff %}
+                <tr>
+                    <td>{{ employee.username }}</td>
+                    <td>{% if employee.email %} {{ employee.email }} {% else %} N/D {% endif %}</td>
+                    <td>
+                        <a href="{% url 'employeelog' employee.id %}" class="btn btn-sm btn-outline-primary">View log</a>
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+        {% else %}
+            <p>0 employees</p>
+        {% endif %}
+    {% endif %}
+
+{% endblock %}
